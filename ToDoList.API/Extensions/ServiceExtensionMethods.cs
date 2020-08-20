@@ -5,7 +5,7 @@ using ToDoList.Core.Context;
 
 namespace ToDoList.API.Extensions
 {
-    public static class CustomExtensionMethods
+    public static class ServiceExtensionMethods
     {
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration)
         {
