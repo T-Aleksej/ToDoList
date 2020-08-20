@@ -24,12 +24,17 @@ namespace ToDoList.API.Controllers
             _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // GET api/[controller]/items[?PageSize=10&PageIndex=1&Title=text&IsComplete=true&DateOfCompletion=01.01.2020]
+        // GET api/[controller][?TodoListItem=1&PageSize=10&PageIndex=1&Title=text&IsComplete=true&Date=2020-08-20]
         [HttpGet]
-        [Route("items")]
         public async Task<ActionResult> ItemsAsync([FromQuery] TodoItemQueryParameters queryParameters)
         {
-            IQueryable<TodoItem> todoItems = _todoListContext.TodoItems.Where(t => t.TodoListItemId == queryParameters.TodoListItemId);
+            IQueryable<TodoItem> todoItems = _todoListContext.TodoItems.Where(t => t.TodoListItemId == queryParameters.TodoListItem);
+
+            if (await todoItems.CountAsync() == 0)
+            {
+                _logger.LogError($"TodoItem with id {queryParameters.TodoListItem} not found.");
+                return NotFound();
+            }
 
             todoItems = todoItems.WhereIf(
                 x => x.Title.Trim().Contains(queryParameters.Title.Trim()),
@@ -40,8 +45,8 @@ namespace ToDoList.API.Controllers
                 () => queryParameters.IsComplete.HasValue);
 
             todoItems = todoItems.WhereIf(
-                x => x.DuetoDateTime.Date == queryParameters.DateOfCompletion.Value.Date,
-                () => queryParameters.DateOfCompletion.HasValue);
+                x => x.DuetoDateTime.Date == queryParameters.Date.Value.Date,
+                () => queryParameters.Date.HasValue);
 
             todoItems = todoItems
                 .OrderBy(t => t.Title)
@@ -51,33 +56,42 @@ namespace ToDoList.API.Controllers
             return Ok(await todoItems.ToListAsync());
         }
 
-        // GET api/[controller]/items/<id>
-        [HttpGet]
-        [Route("items/{id:int}")]
-        public async Task<ActionResult> ItemByIdAsync(int id)
+        // GET api/[controller]/{id}
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
         {
             var todoItem = await _todoListContext.TodoItems.FindAsync(id);
-            if (todoItem == null) return NotFound();
+
+            if (todoItem == null)
+            {
+                _logger.LogError($"TodoItem with id {id} not found.");
+                return NotFound();
+            }
 
             return Ok(todoItem);
         }
 
-        // POST api/[controller]/items/
+        // POST api/[controller]/
         [HttpPost]
-        [Route("items")]
-        public async Task<ActionResult> CreateTodoItemAsync([FromBody] TodoItem todoItem)
+        public async Task<ActionResult<TodoItem>> CreateTodoItemAsync([FromBody] TodoItem todoItem)
         {
             _todoListContext.TodoItems.Add(todoItem);
             await _todoListContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(ItemByIdAsync), new { id = todoItem.Id }, todoItem);
+            return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
         }
 
-        // PUT api/[controller]/items/
+        // PUT api/[controller]/
         [HttpPut]
-        [Route("items")]
-        public async Task<ActionResult> UpdateTodoItemAsync([FromBody] TodoItem todoItem)
+        [Route("{id:int}")]
+        public async Task<ActionResult> UpdateTodoItemAsync([FromRoute] int id, [FromBody] TodoItem todoItem)
         {
+            if (id != todoItem.Id)
+            {
+                _logger.LogError($"TodoItem.Id {todoItem.Id} does not match the Id {id}.");
+                return BadRequest();
+            }
+
             _todoListContext.Entry(todoItem).State = EntityState.Modified;
 
             try
@@ -88,6 +102,7 @@ namespace ToDoList.API.Controllers
             {
                 if (_todoListContext.TodoListItems.Find(todoItem.Id) == null)
                 {
+                    _logger.LogError($"TodoItem with id {id} not found.");
                     return NotFound();
                 }
 
@@ -97,14 +112,16 @@ namespace ToDoList.API.Controllers
             return NoContent();
         }
 
-        // DELETE api/[controller]/<id>
+        // DELETE api/[controller]/
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<ActionResult<TodoItem>> DeleteTodoItemAsync(int id)
         {
             var todoItem = await _todoListContext.TodoItems.SingleOrDefaultAsync(i => i.Id == id);
+
             if (todoItem == null)
             {
+                _logger.LogError($"TodoItem with id {id} not found.");
                 return NotFound();
             }
 
