@@ -10,7 +10,7 @@ namespace ToDoList.API.Infrastructure
         public int PageIndex { get; set; } = 1;
         public int PageSize
         {
-            get => Math.Max(_pageSize, 1);
+            get => Math.Max(_pageSize, 10);
             set => _pageSize = Math.Min(_maxPageSize, value);
         }
     }
