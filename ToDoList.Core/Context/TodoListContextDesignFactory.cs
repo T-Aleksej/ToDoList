@@ -8,11 +8,8 @@ namespace ToDoList.Core.Context
         public TodoListContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<TodoListContext>()
-                .UseInMemoryDatabase("TodoList");
-
-            //var optionsBuilder = new DbContextOptionsBuilder<TodoListContext>()
-            //    .UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=TodoList;MultipleActiveResultSets=True",
-            //    x => x.MigrationsAssembly("ToDoList.Data"));
+                .UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=TodoList;MultipleActiveResultSets=True",
+                x => x.MigrationsAssembly("ToDoList.Data"));
 
             return new TodoListContext(optionsBuilder.Options);
         }
