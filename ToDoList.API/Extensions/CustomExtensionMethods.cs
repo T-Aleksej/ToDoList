@@ -11,7 +11,7 @@ namespace ToDoList.API.Extensions
         {
             services.AddDbContext<TodoListContext>(options =>
             {
-                options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=TodoList;MultipleActiveResultSets=True");
+                options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
             });
 
             return services;
