@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 
 namespace ToDoList.Core.Model
 {
@@ -12,6 +11,6 @@ namespace ToDoList.Core.Model
         public bool Done { get; set; }
 
         public int TodoListItemId { get; set; }
-        [JsonIgnore]  public TodoListItem TodoListItem { get; set; }
+        public TodoListItem TodoListItem { get; set; }
     }
 }
