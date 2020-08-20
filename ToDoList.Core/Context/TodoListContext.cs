@@ -13,8 +13,7 @@ namespace ToDoList.Core.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new TodoListItemEntityTypeConfiguration());
-            builder.ApplyConfiguration(new TodoItemEntityTypeConfiguration());
+            builder.ApplyConfigurationsFromAssembly(typeof(TodoListContext).Assembly);
         }
     }
 }
