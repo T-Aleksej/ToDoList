@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
 
@@ -26,7 +27,7 @@ namespace ToDoList.API.Controllers
 
         // GET api/[controller][?PageSize=10&PageIndex=1&Title=text]
         [HttpGet]
-        public async Task<ActionResult> ItemsAsync([FromQuery] TodoListItemQueryParameters queryParameters)
+        public async Task<ActionResult<PaginatedItemsViewModel<TodoListItem>>> ItemsAsync([FromQuery] TodoListItemQueryParameters queryParameters)
         {
             IQueryable<TodoListItem> todoListItems = _todoListContext.TodoListItems;
 
@@ -34,12 +35,16 @@ namespace ToDoList.API.Controllers
                 x => x.Title.Trim().Contains(queryParameters.Title.Trim()),
                 () => !string.IsNullOrWhiteSpace(queryParameters.Title));
 
+            var totalitems = await todoListItems.LongCountAsync();
+
             todoListItems = todoListItems
                 .OrderBy(t => t.Title)
                 .Skip(queryParameters.PageSize * (queryParameters.PageIndex - 1))
                 .Take(queryParameters.PageSize);
 
-            return Ok(await todoListItems.ToListAsync());
+            var model = new PaginatedItemsViewModel<TodoListItem>(queryParameters.PageIndex, queryParameters.PageSize, totalitems, await todoListItems.ToListAsync());
+            return Ok(model);
+            //return Ok(await todoListItems.ToListAsync());
         }
 
         // GET api/[controller]/{id}
