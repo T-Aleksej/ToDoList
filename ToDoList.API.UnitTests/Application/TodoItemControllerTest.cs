@@ -4,9 +4,12 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using ToDoList.API.Controllers;
+using ToDoList.API.Infrastructure;
+using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
 using Xunit;
@@ -27,9 +30,34 @@ namespace ToDoList.API.UnitTests.Application
 
             using (var dbContext = new TodoListContext(_dbOptions))
             {
-                dbContext.AddRange(GetFakeTodoItem());
+                dbContext.AddRange(GetFakeTodoItems());
                 dbContext.SaveChanges();
             }
+        }
+
+        [Fact]
+        public async Task Get_TodoItems_Success()
+        {
+            //Arrange
+            var todoListItemId = 1;
+            var totalitems = 1;
+            var pageIndex = 1;
+            var pageSize = 15;
+            var itemsInPage = 1;
+            var queryParam = GetFakeTodoItemQueryParameters(todoListItemId, pageSize, pageIndex);
+            var todoListContext = new TodoListContext(_dbOptions);
+
+            // Act
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var actionResult = await todoItemController.ItemsAsync(queryParam);
+
+            //Assert
+            Assert.IsType<ActionResult<PaginatedItemsViewModel<TodoItem>>>(actionResult);
+            var viewModel = Assert.IsAssignableFrom<PaginatedItemsViewModel<TodoItem>>(((ObjectResult)actionResult.Result).Value);
+            Assert.Equal(totalitems, viewModel.Totalitems);
+            Assert.Equal(pageIndex, viewModel.PageIndex);
+            Assert.Equal(pageSize, viewModel.PageSize);
+            Assert.Equal(itemsInPage, viewModel.Data.Count());
         }
 
         [Fact]
@@ -46,7 +74,6 @@ namespace ToDoList.API.UnitTests.Application
             //Assert
             Assert.Equal((actionResult.Result as OkObjectResult).StatusCode, (int)HttpStatusCode.OK);
             Assert.Equal((((ObjectResult)actionResult.Result).Value as TodoItem).Id, todoItemId);
-            //expected, T actual)
         }
 
         [Fact]
@@ -98,14 +125,14 @@ namespace ToDoList.API.UnitTests.Application
             Assert.Equal(actionResult.Value.Id, todoItemId);
         }
 
-        private List<TodoItem> GetFakeTodoItem()
+        private List<TodoItem> GetFakeTodoItems()
         {
             return new List<TodoItem>()
             {
                 new TodoItem()
                 {
                     Id = 1,
-                    //TodoListItem = new TodoListItem() { Id = 1, Title = "Title", Description = "Description" },
+                    TodoListItemId = 1,
                     Title = "Title",
                     Content = "Content",
                     Done = true,
@@ -123,6 +150,15 @@ namespace ToDoList.API.UnitTests.Application
                 Content = "Content",
                 Done = true,
                 DuetoDateTime = DateTime.Now
+            };
+        }
+        private TodoItemQueryParameters GetFakeTodoItemQueryParameters(int todoListItemId, int pageSize, int pageIndex)
+        {
+            return new TodoItemQueryParameters()
+            {
+                TodoListItem = todoListItemId,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
         }
     }
