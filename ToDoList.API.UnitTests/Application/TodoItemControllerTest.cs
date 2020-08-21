@@ -23,12 +23,10 @@ namespace ToDoList.API.UnitTests.Application
             _loggerMock = new Mock<ILogger<TodoItemController>>();
 
             _dbOptions = new DbContextOptionsBuilder<TodoListContext>()
-                .UseInMemoryDatabase(databaseName: "ToDoList").Options;
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 
             using (var dbContext = new TodoListContext(_dbOptions))
             {
-                dbContext.Database.EnsureDeleted();
-
                 dbContext.AddRange(GetFakeTodoItem());
                 dbContext.SaveChanges();
             }
