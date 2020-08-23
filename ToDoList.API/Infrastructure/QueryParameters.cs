@@ -7,7 +7,14 @@ namespace ToDoList.API.Infrastructure
         const int _maxPageSize = 100;
         private int _pageSize;
 
+        /// <summary>
+        /// Page number
+        /// </summary>
         public int PageIndex { get; set; } = 1;
+
+        /// <summary>
+        /// Number of items per page
+        /// </summary>
         public int PageSize
         {
             get => Math.Max(_pageSize, 10);
