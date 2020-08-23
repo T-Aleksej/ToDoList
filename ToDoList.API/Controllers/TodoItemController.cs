@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
@@ -20,11 +20,13 @@ namespace ToDoList.API.Controllers
     {
         private readonly ILogger<TodoItemController> _logger;
         private readonly TodoListContext _todoListContext;
+        private readonly ITodoItemFilterService _filter;
 
-        public TodoItemController(TodoListContext context, ILogger<TodoItemController> logger)
+        public TodoItemController(TodoListContext context, ILogger<TodoItemController> logger, ITodoItemFilterService filter)
         {
             _logger = logger;
             _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
+            _filter = filter;
         }
 
         /// <summary>
@@ -51,26 +53,9 @@ namespace ToDoList.API.Controllers
                 return NotFound();
             }
 
-            todoItems = todoItems.WhereIf(
-                x => x.Title.Trim().Contains(queryParameters.Title.Trim()),
-                () => !string.IsNullOrWhiteSpace(queryParameters.Title));
+            (IQueryable<TodoItem> resultPages, long todoListItems) filteredValue = await _filter.FilteredByNameAndDateAndComplete(todoItems, queryParameters);
 
-            todoItems = todoItems.WhereIf(
-                x => x.Done == queryParameters.IsComplete.Value,
-                () => queryParameters.IsComplete.HasValue);
-
-            todoItems = todoItems.WhereIf(
-                x => x.DuetoDateTime.Date == queryParameters.Date.Value.Date,
-                () => queryParameters.Date.HasValue);
-
-            var totalitems = await todoItems.LongCountAsync();
-
-            todoItems = todoItems
-                .OrderBy(t => t.Title)
-                .Skip(queryParameters.PageSize * (queryParameters.PageIndex - 1))
-                .Take(queryParameters.PageSize);
-
-            var model = new PaginatedItemsViewModel<TodoItem>(queryParameters.PageIndex, queryParameters.PageSize, totalitems, await todoItems.ToListAsync());
+            var model = new PaginatedItemsViewModel<TodoItem>(queryParameters.PageIndex, queryParameters.PageSize, filteredValue.todoListItems, await filteredValue.resultPages.ToListAsync());
             return Ok(model);
         }
 
