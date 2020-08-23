@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using ToDoList.API.Controllers;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
@@ -46,9 +47,10 @@ namespace ToDoList.API.UnitTests.Application
             var itemsInPage = 1;
             var queryParam = GetFakeTodoItemQueryParameters(todoListItemId, pageSize, pageIndex);
             var todoListContext = new TodoListContext(_dbOptions);
+            ITodoItemFilterService filter = new TodoItemFilterService();
 
             // Act
-            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object, filter);
             var actionResult = await todoItemController.ItemsAsync(queryParam);
 
             //Assert
@@ -66,9 +68,10 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int todoItemId = 1;
             var todoListContext = new TodoListContext(_dbOptions);
+            ITodoItemFilterService filter = new TodoItemFilterService();
 
             // Act
-            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object, filter);
             var actionResult = await todoItemController.GetTodoItem(todoItemId);
 
             //Assert
@@ -83,9 +86,10 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 2;
             var todoListContext = new TodoListContext(_dbOptions);
             var fakeTodoItem = GetTodoItemFake(todoItemId);
+            ITodoItemFilterService filter = new TodoItemFilterService();
 
             // Act
-            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object, filter);
             var actionResult = await todoItemController.CreateTodoItemAsync(fakeTodoItem);
 
             //Assert
@@ -100,9 +104,10 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 1;
             var todoListContext = new TodoListContext(_dbOptions);
             var fakeTodoItem = GetTodoItemFake(todoItemId);
+            ITodoItemFilterService filter = new TodoItemFilterService();
 
             // Act
-            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object, filter);
             var actionResult = await todoItemController.UpdateTodoItemAsync(todoItemId, fakeTodoItem);
 
             //Assert
@@ -116,9 +121,10 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 1;
             var todoListContext = new TodoListContext(_dbOptions);
             var fakeTodoItem = GetTodoItemFake(todoItemId);
+            ITodoItemFilterService filter = new TodoItemFilterService();
 
             // Act
-            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object);
+            var todoItemController = new TodoItemController(todoListContext, _loggerMock.Object, filter);
             var actionResult = await todoItemController.DeleteTodoItemAsync(todoItemId);
 
             //Assert
