@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ToDoList.API.Extensions;
-using ToDoList.Core.Context;
+using ToDoList.API.Services;
 
 namespace ToDoList.API
 {
@@ -30,6 +24,9 @@ namespace ToDoList.API
             services.AddCustomDbContext(Configuration);
             services.AddControllers();
             services.AddSwagger(Configuration);
+
+            services.AddScoped<ITodoItemFilterService, TodoItemFilterService>();
+            services.AddScoped<ITodoListItemFilterService, TodoListItemFilterService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,8 +46,8 @@ namespace ToDoList.API
 
             app.UseRouting();
 
-            app.UseEndpoints(endpoints => 
-            { 
+            app.UseEndpoints(endpoints =>
+            {
                 endpoints.MapControllers();
                 endpoints.MapDefaultControllerRoute();
             });
