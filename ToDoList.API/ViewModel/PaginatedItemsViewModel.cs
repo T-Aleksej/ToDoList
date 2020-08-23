@@ -12,12 +12,24 @@ namespace ToDoList.API.ViewModel
             Data = data;
         }
 
+        /// <summary>
+        /// Page number
+        /// </summary>
         public int PageIndex { get; private set; }
 
+        /// <summary>
+        /// Number of items per page
+        /// </summary>
         public int PageSize { get; private set; }
 
+        /// <summary>
+        /// Total items
+        /// </summary>
         public long Totalitems { get; private set; }
 
+        /// <summary>
+        /// The data playload
+        /// </summary>
         public IEnumerable<TEntity> Data { get; private set; }
     }
 }
