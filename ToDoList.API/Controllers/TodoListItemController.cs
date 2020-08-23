@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,6 +13,7 @@ using ToDoList.Core.Model;
 
 namespace ToDoList.API.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class TodoListItemController : ControllerBase
@@ -25,8 +27,18 @@ namespace ToDoList.API.Controllers
             _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // GET api/[controller][?PageSize=10&PageIndex=1&Title=text]
+        /// <summary>
+        /// Enumerating TodoListItem by page
+        /// </summary>
+        /// <param name="queryParameters">AG set of optional filtering and pagination parameters</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET api/[controller]?{pageSize=10&amp;pageIndex=1&amp;title=title}
+        /// </remarks>
         [HttpGet]
+        [ProducesResponseType(typeof(PaginatedItemsViewModel<TodoListItem>), StatusCodes.Status200OK)]
         public async Task<ActionResult<PaginatedItemsViewModel<TodoListItem>>> ItemsAsync([FromQuery] TodoListItemQueryParameters queryParameters)
         {
             IQueryable<TodoListItem> todoListItems = _todoListContext.TodoListItems;
@@ -44,11 +56,22 @@ namespace ToDoList.API.Controllers
 
             var model = new PaginatedItemsViewModel<TodoListItem>(queryParameters.PageIndex, queryParameters.PageSize, totalitems, await todoListItems.ToListAsync());
             return Ok(model);
-            //return Ok(await todoListItems.ToListAsync());
         }
 
-        // GET api/[controller]/{id}
+        /// <summary>
+        /// TodoListItem matching passed ID
+        /// </summary>
+        /// <param name="id">The TodoListItem id</param>
+        /// <returns>Concretely TodoListItem</returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET api/[controller]/{id}
+        /// </remarks>
+        /// <response code="404">If the item is not found</response>
         [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(TodoListItem), StatusCodes.Status200OK)]
         public async Task<ActionResult<TodoListItem>> GetTodoListItem(int id)
         {
             var todoListItem = await _todoListContext.TodoListItems.FindAsync(id);
@@ -62,8 +85,22 @@ namespace ToDoList.API.Controllers
             return Ok(todoListItem);
         }
 
-        // POST api/[controller]/
+        /// <summary>
+        /// Add a specific TodoListItem.
+        /// </summary>
+        /// <param name="todoListItem">The TodoListItem</param>
+        /// <returns>A newly aded TodoListItem</returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST api/[controller]/
+        ///     {
+        ///        "title": "Title",
+        ///        "description": "Description"
+        ///     }
+        /// </remarks>
         [HttpPost]
+        [ProducesResponseType(typeof(TodoListItem), StatusCodes.Status201Created)]
         public async Task<ActionResult<TodoListItem>> CreateTodoListItemAsync([FromBody] TodoListItem todoListItem)
         {
             _todoListContext.TodoListItems.Add(todoListItem);
@@ -72,9 +109,28 @@ namespace ToDoList.API.Controllers
             return CreatedAtAction(nameof(GetTodoListItem), new { id = todoListItem.Id }, todoListItem);
         }
 
-        // PUT api/[controller]/
+        /// <summary>
+        /// Change a specific TodoListItem.
+        /// </summary>
+        /// <param name="id">The TodoListItem id</param>
+        /// <param name="todoListItem">The TodoListItem</param>
+        /// <returns>Status codes 204 No Content</returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT api/[controller]/{id}/
+        ///     {
+        ///        "id": 1,
+        ///        "title": "Title",
+        ///        "description": "Description"
+        ///     }
+        /// </remarks>
+        /// <response code="400">If id is not equal to TodoListItem.Id</response>
+        /// <response code="404">If the item is not found</response>
         [HttpPut]
         [Route("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateTodoListItemAsync([FromRoute] int id, [FromBody] TodoListItem todoListItem)
         {
             if (id != todoListItem.Id)
@@ -103,9 +159,20 @@ namespace ToDoList.API.Controllers
             return NoContent();
         }
 
-        // DELETE api/[controller]/
+        /// <summary>
+        /// Deletes a specific TodoListItem.
+        /// </summary>
+        /// <param name="id">The TodoListItem id</param>
+        /// <returns>A newly deleted TodoListItem</returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     DELETE /api/[controller]/{id}
+        /// </remarks>
+        /// <response code="404">If the item is not found</response>
         [HttpDelete]
         [Route("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TodoListItem>> DeleteTodoListItemAsync(int id)
         {
             var todoListItem = await _todoListContext.TodoListItems.SingleOrDefaultAsync(i => i.Id == id);
