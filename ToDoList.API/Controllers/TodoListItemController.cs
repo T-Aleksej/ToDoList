@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
@@ -20,11 +20,13 @@ namespace ToDoList.API.Controllers
     {
         private readonly ILogger<TodoListItemController> _logger;
         private readonly TodoListContext _todoListContext;
+        private readonly ITodoListItemFilterService _filter;
 
-        public TodoListItemController(TodoListContext context, ILogger<TodoListItemController> logger)
+        public TodoListItemController(TodoListContext context, ILogger<TodoListItemController> logger, ITodoListItemFilterService filter)
         {
             _logger = logger;
             _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
+            _filter = filter;
         }
 
         /// <summary>
@@ -43,18 +45,9 @@ namespace ToDoList.API.Controllers
         {
             IQueryable<TodoListItem> todoListItems = _todoListContext.TodoListItems;
 
-            todoListItems = todoListItems.WhereIf(
-                x => x.Title.Trim().Contains(queryParameters.Title.Trim()),
-                () => !string.IsNullOrWhiteSpace(queryParameters.Title));
+            (IQueryable<TodoListItem> resultPages, long todoListItems) filteredValue = await _filter.FilteredByName(todoListItems, queryParameters);
 
-            var totalitems = await todoListItems.LongCountAsync();
-
-            todoListItems = todoListItems
-                .OrderBy(t => t.Title)
-                .Skip(queryParameters.PageSize * (queryParameters.PageIndex - 1))
-                .Take(queryParameters.PageSize);
-
-            var model = new PaginatedItemsViewModel<TodoListItem>(queryParameters.PageIndex, queryParameters.PageSize, totalitems, await todoListItems.ToListAsync());
+            var model = new PaginatedItemsViewModel<TodoListItem>(queryParameters.PageIndex, queryParameters.PageSize, filteredValue.todoListItems, await filteredValue.resultPages.ToListAsync());
             return Ok(model);
         }
 
