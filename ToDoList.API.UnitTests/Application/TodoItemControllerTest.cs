@@ -37,7 +37,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Get_TodoItems_Success()
+        public async Task Get_TodoItems_Should_Succeed()
         {
             //Arrange
             var todoListItemId = 1;
@@ -63,7 +63,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Get_TodoItem_Success()
+        public async Task Get_TodoItem_Should_Succeed()
         {
             //Arrange
             int todoItemId = 1;
@@ -80,7 +80,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Post_TodoItem_Success()
+        public async Task Post_TodoItem_Should_Succeed()
         {
             //Arrange
             int todoItemId = 2;
@@ -98,7 +98,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Put_TodoItem_Success()
+        public async Task Put_TodoItem_Should_Succeed()
         {
             //Arrange
             int todoItemId = 1;
@@ -115,7 +115,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Delete_TodoItem_Success()
+        public async Task Delete_TodoItem_Should_Succeed()
         {
             //Arrange
             int todoItemId = 1;

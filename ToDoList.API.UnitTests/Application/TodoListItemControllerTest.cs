@@ -37,7 +37,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Get_TodoListItems_Success()
+        public async Task Get_TodoListItems_Should_Succeed()
         {
             //Arrange
             var totalitems = 1;
@@ -62,7 +62,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Get_TodoListItem_Success()
+        public async Task Get_TodoListItem_Should_Succeed()
         {
             //Arrange
             int todoListItemId = 1;
@@ -79,7 +79,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Post_TodoListItem_Success()
+        public async Task Post_TodoListItem_Should_Succeed()
         {
             //Arrange
             int todoListItemId = 3;
@@ -97,7 +97,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Put_TodoListItem_Success()
+        public async Task Put_TodoListItem_Should_Succeed()
         {
             //Arrange
             int todoListItemId = 1;
@@ -114,7 +114,7 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
-        public async Task Delete_TodoListItem_Success()
+        public async Task Delete_TodoListItem_Should_Succeed()
         {
             //Arrange
             int todoListItemId = 1;
@@ -124,7 +124,6 @@ namespace ToDoList.API.UnitTests.Application
 
             // Act
             var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
-
             var actionResult = await todoListItemController.DeleteTodoListItemAsync(todoListItemId);
 
             //Assert
