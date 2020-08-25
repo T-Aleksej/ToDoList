@@ -71,11 +71,27 @@ namespace ToDoList.API.UnitTests.Application
 
             // Act
             var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
-            var actionResult = await todoListItemController.GetTodoListItem(todoListItemId);
+            var actionResult = await todoListItemController.GetTodoListItemAsync(todoListItemId);
 
             //Assert
             Assert.Equal((actionResult.Result as OkObjectResult).StatusCode, (int)HttpStatusCode.OK);
             Assert.Equal((((ObjectResult)actionResult.Result).Value as TodoListItem).Id, todoListItemId);
+        }
+
+        [Fact]
+        public async Task Get_TodoListItem_Should_Return_404_If_No_Data_Exist()
+        {
+            //Arrange
+            int notExistTodoListItemId = 2;
+            var todoListContext = new TodoListContext(_dbOptions);
+            ITodoListItemFilterService filter = new TodoListItemFilterService();
+
+            // Act
+            var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
+            var actionResult = await todoListItemController.GetTodoListItemAsync(notExistTodoListItemId);
+
+            //Assert
+            Assert.Equal((actionResult.Result as NotFoundResult).StatusCode, (int)HttpStatusCode.NotFound);
         }
 
         [Fact]
@@ -114,6 +130,41 @@ namespace ToDoList.API.UnitTests.Application
         }
 
         [Fact]
+        public async Task Put_TodoListItem_Should_Return_400_If_Data_Wrong()
+        {
+            //Arrange
+            int todoListItemId = 1;
+            int wrongTodoListItemId = 2;
+            var todoListContext = new TodoListContext(_dbOptions);
+            var fakeTodoListItem = GetTodoListItemFake(todoListItemId);
+            ITodoListItemFilterService filter = new TodoListItemFilterService();
+
+            // Act
+            var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
+            var actionResult = await todoListItemController.UpdateTodoListItemAsync(wrongTodoListItemId, fakeTodoListItem);
+
+            //Assert
+            Assert.Equal((actionResult as BadRequestResult).StatusCode, (int)HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Put_TodoListItem_Should_Return_404_If_No_Data_Exist()
+        {
+            //Arrange
+            int notExistTodoListItemId = 2;
+            var todoListContext = new TodoListContext(_dbOptions);
+            var fakeTodoListItem = GetTodoListItemFake(notExistTodoListItemId);
+            ITodoListItemFilterService filter = new TodoListItemFilterService();
+
+            // Act
+            var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
+            var actionResult = await todoListItemController.UpdateTodoListItemAsync(notExistTodoListItemId, fakeTodoListItem);
+
+            //Assert
+            Assert.Equal((actionResult as NotFoundResult).StatusCode, (int)HttpStatusCode.NotFound);
+        }
+
+        [Fact]
         public async Task Delete_TodoListItem_Should_Succeed()
         {
             //Arrange
@@ -128,6 +179,22 @@ namespace ToDoList.API.UnitTests.Application
 
             //Assert
             Assert.Equal(actionResult.Value.Id, todoListItemId);
+        }
+
+        [Fact]
+        public async Task Delete_TodoListItem_Should_Return_404_If_No_Data_Exist()
+        {
+            //Arrange
+            int notExistTodoListItemId = 2;
+            var todoListContext = new TodoListContext(_dbOptions);
+            ITodoListItemFilterService filter = new TodoListItemFilterService();
+
+            // Act
+            var todoListItemController = new TodoListItemController(todoListContext, _loggerMock.Object, filter);
+            var actionResult = await todoListItemController.DeleteTodoListItemAsync(notExistTodoListItemId);
+
+            //Assert
+            Assert.Equal((actionResult.Result as NotFoundResult).StatusCode, (int)HttpStatusCode.NotFound);
         }
 
         private List<TodoListItem> GetFakeTodoListItems()
