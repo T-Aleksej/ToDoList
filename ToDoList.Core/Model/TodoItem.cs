@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace ToDoList.Core.Model
@@ -20,12 +21,12 @@ namespace ToDoList.Core.Model
         /// <summary>
         /// Assigned due date
         /// </summary>
-        [Required] public DateTime DuetoDateTime { get; set; }
+        [DataType(DataType.Date)] [Required] public DateTime DuetoDateTime { get; set; }
 
         /// <summary>
         /// Is the task done
         /// </summary>
-        [Required] public bool Done { get; set; }
+        [DefaultValue(false)] [Required] public bool Done { get; set; }
 
         public int TodoListItemId { get; set; }
         public TodoListItem TodoListItem { get; set; }
