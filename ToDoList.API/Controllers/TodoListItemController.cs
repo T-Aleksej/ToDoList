@@ -62,10 +62,10 @@ namespace ToDoList.API.Controllers
         ///     GET api/[controller]/{id}
         /// </remarks>
         /// <response code="404">If the item is not found</response>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = nameof(GetTodoListItemAsync))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(TodoListItem), StatusCodes.Status200OK)]
-        public async Task<ActionResult<TodoListItem>> GetTodoListItem(int id)
+        public async Task<ActionResult<TodoListItem>> GetTodoListItemAsync(int id)
         {
             var todoListItem = await _todoListContext.TodoListItems.FindAsync(id);
 
@@ -99,7 +99,8 @@ namespace ToDoList.API.Controllers
             _todoListContext.TodoListItems.Add(todoListItem);
             await _todoListContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTodoListItem), new { id = todoListItem.Id }, todoListItem);
+            //return CreatedAtAction(nameof(GetTodoListItem), new { id = todoListItem.Id }, todoListItem);
+            return CreatedAtRoute(nameof(GetTodoListItemAsync), new { id = todoListItem.Id }, todoListItem);
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace ToDoList.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (_todoListContext.TodoListItems.Find(todoListItem.Id) == null)
+                if (!_todoListContext.TodoListItems.Any(t => t.Id == todoListItem.Id))
                 {
                     _logger.LogError($"TodoListItem with id {id} not found.");
                     return NotFound();
