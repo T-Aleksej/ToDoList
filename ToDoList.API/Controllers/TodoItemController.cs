@@ -6,9 +6,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Repositories;
 using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
-using ToDoList.Core.Context;
 using ToDoList.Core.Model;
 
 namespace ToDoList.API.Controllers
@@ -19,14 +19,14 @@ namespace ToDoList.API.Controllers
     public class TodoItemController : ControllerBase
     {
         private readonly ILogger<TodoItemController> _logger;
-        private readonly TodoListContext _todoListContext;
         private readonly ITodoItemFilterService _filter;
+        private readonly ITodoItemRepository _repo;
 
-        public TodoItemController(TodoListContext context, ILogger<TodoItemController> logger, ITodoItemFilterService filter)
+        public TodoItemController(ITodoItemRepository repo, ILogger<TodoItemController> logger, ITodoItemFilterService filter)
         {
             _logger = logger;
-            _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
             _filter = filter;
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<PaginatedItemsViewModel<TodoItem>>> ItemsAsync([FromQuery] TodoItemQueryParameters queryParameters)
         {
-            IQueryable<TodoItem> todoItems = _todoListContext.TodoItems.Where(t => t.TodoListItemId == queryParameters.TodoListItem);
+            var todoItems = _repo.GetQueryable().Where(t => t.TodoListItemId == queryParameters.TodoListItem);
 
             if (await todoItems.CountAsync() == 0)
             {
@@ -75,7 +75,7 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(typeof(TodoItem), StatusCodes.Status200OK)]
         public async Task<ActionResult<TodoItem>> GetTodoItemAsync(int id)
         {
-            var todoItem = await _todoListContext.TodoItems.FindAsync(id);
+            var todoItem = await _repo.GetByIdAsync(id);
 
             if (todoItem == null)
             {
@@ -106,10 +106,9 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(typeof(TodoItem), StatusCodes.Status201Created)]
         public async Task<ActionResult<TodoItem>> CreateTodoItemAsync([FromBody] TodoItem todoItem)
         {
-            _todoListContext.TodoItems.Add(todoItem);
-            await _todoListContext.SaveChangesAsync();
+            _repo.Add(todoItem);
+            await _repo.SaveAsync();
 
-            //return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
             return CreatedAtRoute(nameof(GetTodoItemAsync), new { id = todoItem.Id }, todoItem);
         }
 
@@ -145,16 +144,15 @@ namespace ToDoList.API.Controllers
                 return BadRequest();
             }
 
-            _todoListContext.Entry(todoItem).State = EntityState.Modified;
+            _repo.Update(todoItem);
 
             try
             {
-                await _todoListContext.SaveChangesAsync();
+                await _repo.SaveAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                //if (_todoListContext.TodoListItems.Find(todoItem.Id) == null)
-                if (!_todoListContext.TodoListItems.Any(t => t.Id == todoItem.Id))
+                if (!_repo.GetQueryable().Any(t => t.Id == todoItem.Id))
                 {
                     _logger.LogError($"TodoItem with id {id} not found.");
                     return NotFound();
@@ -182,7 +180,7 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TodoItem>> DeleteTodoItemAsync(int id)
         {
-            var todoItem = await _todoListContext.TodoItems.SingleOrDefaultAsync(i => i.Id == id);
+            var todoItem = await _repo.GetQueryable().SingleOrDefaultAsync(i => i.Id == id);
 
             if (todoItem == null)
             {
@@ -190,8 +188,8 @@ namespace ToDoList.API.Controllers
                 return NotFound();
             }
 
-            _todoListContext.TodoItems.Remove(todoItem);
-            await _todoListContext.SaveChangesAsync();
+            _repo.Remove(todoItem);
+            await _repo.SaveAsync();
 
             return todoItem;
         }
