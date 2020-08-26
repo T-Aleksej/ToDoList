@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ToDoList.API.Extensions;
+using ToDoList.API.Repositories;
 using ToDoList.API.Services;
 
 namespace ToDoList.API
@@ -27,6 +28,9 @@ namespace ToDoList.API
 
             services.AddScoped<ITodoItemFilterService, TodoItemFilterService>();
             services.AddScoped<ITodoListItemFilterService, TodoListItemFilterService>();
+
+            services.AddScoped<ITodoListItemRepository, TodoListItemRepository>();
+            services.AddScoped<ITodoItemRepository, TodoItemRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
