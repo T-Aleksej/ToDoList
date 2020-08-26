@@ -6,9 +6,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Repositories;
 using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
-using ToDoList.Core.Context;
 using ToDoList.Core.Model;
 
 namespace ToDoList.API.Controllers
@@ -19,20 +19,20 @@ namespace ToDoList.API.Controllers
     public class TodoListItemController : ControllerBase
     {
         private readonly ILogger<TodoListItemController> _logger;
-        private readonly TodoListContext _todoListContext;
         private readonly ITodoListItemFilterService _filter;
+        private readonly ITodoListItemRepository _repo;
 
-        public TodoListItemController(TodoListContext context, ILogger<TodoListItemController> logger, ITodoListItemFilterService filter)
+        public TodoListItemController(ITodoListItemRepository repo, ILogger<TodoListItemController> logger, ITodoListItemFilterService filter)
         {
             _logger = logger;
-            _todoListContext = context ?? throw new ArgumentNullException(nameof(context));
             _filter = filter;
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
         /// <summary>
         /// Enumerating TodoListItem by page
         /// </summary>
-        /// <param name="queryParameters">AG set of optional filtering and pagination parameters</param>
+        /// <param name="queryParams">AG set of optional filtering and pagination parameters</param>
         /// <returns></returns>
         /// <remarks>
         /// Sample request:
@@ -41,13 +41,13 @@ namespace ToDoList.API.Controllers
         /// </remarks>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedItemsViewModel<TodoListItem>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<PaginatedItemsViewModel<TodoListItem>>> ItemsAsync([FromQuery] TodoListItemQueryParameters queryParameters)
+        public async Task<ActionResult<PaginatedItemsViewModel<TodoListItem>>> ItemsAsync([FromQuery] TodoListItemQueryParameters queryParams)
         {
-            IQueryable<TodoListItem> todoListItems = _todoListContext.TodoListItems;
+            var todoListItems = _repo.GetQueryable();
 
-            (IQueryable<TodoListItem> resultPages, long todoListItems) filteredValue = await _filter.FilteredByName(todoListItems, queryParameters);
+            (IQueryable<TodoListItem> resultPages, long todoListItems) filteredValue = await _filter.FilteredByName(todoListItems, queryParams);
 
-            var model = new PaginatedItemsViewModel<TodoListItem>(queryParameters.PageIndex, queryParameters.PageSize, filteredValue.todoListItems, await filteredValue.resultPages.ToListAsync());
+            var model = new PaginatedItemsViewModel<TodoListItem>(queryParams.PageIndex, queryParams.PageSize, filteredValue.todoListItems, await filteredValue.resultPages.ToListAsync());
             return Ok(model);
         }
 
@@ -67,7 +67,7 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(typeof(TodoListItem), StatusCodes.Status200OK)]
         public async Task<ActionResult<TodoListItem>> GetTodoListItemAsync(int id)
         {
-            var todoListItem = await _todoListContext.TodoListItems.FindAsync(id);
+            var todoListItem = await _repo.GetByIdAsync(id);
 
             if (todoListItem == null)
             {
@@ -96,10 +96,9 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(typeof(TodoListItem), StatusCodes.Status201Created)]
         public async Task<ActionResult<TodoListItem>> CreateTodoListItemAsync([FromBody] TodoListItem todoListItem)
         {
-            _todoListContext.TodoListItems.Add(todoListItem);
-            await _todoListContext.SaveChangesAsync();
+            _repo.Add(todoListItem);
+            await _repo.SaveAsync();
 
-            //return CreatedAtAction(nameof(GetTodoListItem), new { id = todoListItem.Id }, todoListItem);
             return CreatedAtRoute(nameof(GetTodoListItemAsync), new { id = todoListItem.Id }, todoListItem);
         }
 
@@ -133,15 +132,15 @@ namespace ToDoList.API.Controllers
                 return BadRequest();
             }
 
-            _todoListContext.Entry(todoListItem).State = EntityState.Modified;
+            _repo.Update(todoListItem);
 
             try
             {
-                await _todoListContext.SaveChangesAsync();
+                await _repo.SaveAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_todoListContext.TodoListItems.Any(t => t.Id == todoListItem.Id))
+                if (!_repo.GetQueryable().Any(t => t.Id == todoListItem.Id))
                 {
                     _logger.LogError($"TodoListItem with id {id} not found.");
                     return NotFound();
@@ -169,7 +168,7 @@ namespace ToDoList.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TodoListItem>> DeleteTodoListItemAsync(int id)
         {
-            var todoListItem = await _todoListContext.TodoListItems.SingleOrDefaultAsync(i => i.Id == id);
+            var todoListItem = await _repo.GetQueryable().SingleOrDefaultAsync(i => i.Id == id);
 
             if (todoListItem == null)
             {
@@ -177,8 +176,8 @@ namespace ToDoList.API.Controllers
                 return NotFound();
             }
 
-            _todoListContext.TodoListItems.Remove(todoListItem);
-            await _todoListContext.SaveChangesAsync();
+            _repo.Remove(todoListItem);
+            await _repo.SaveAsync();
 
             return todoListItem;
         }
