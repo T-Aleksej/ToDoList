@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using ToDoList.API.Swagger;
 using ToDoList.Core.Context;
 
 namespace ToDoList.API.Extensions
@@ -25,16 +26,34 @@ namespace ToDoList.API.Extensions
         {
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "ToDo API",
-                    Description = "A simple example ASP.NET Core Web API"
-                });
+                options.OperationFilter<SwaggerDefaultValues>();
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name }.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddApiVersioning(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true; // api-supported-versions api-deprecated-versions
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddApiExplorer(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVVV";
+                options.SubstituteApiVersionInUrl = false;
             });
 
             return services;
