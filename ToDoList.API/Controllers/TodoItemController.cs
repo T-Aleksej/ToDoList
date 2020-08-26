@@ -14,7 +14,8 @@ using ToDoList.Core.Model;
 namespace ToDoList.API.Controllers
 {
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [ApiVersion(version: "1.0", Deprecated = false)]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class TodoItemController : ControllerBase
     {
@@ -37,7 +38,7 @@ namespace ToDoList.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET api/[controller]?{pageIndex=10&amp;pageSize=1&amp;todoListItem=1&amp;title=title&amp;date=2020-08-20&amp;isComplete=true}
+        ///     GET /api/v{version}/[controller]?{pageIndex=10&amp;pageSize=1&amp;todoListItem=1&amp;title=title&amp;date=2020-08-20&amp;isComplete=true}
         /// </remarks>
         /// <response code="404">If the items is not found</response>
         [HttpGet]
@@ -67,7 +68,7 @@ namespace ToDoList.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET api/[controller]/{id}
+        ///     GET /api/v{version}/[controller]/{id}
         /// </remarks>
         /// <response code="404">If the item is not found</response>
         [HttpGet("{id:int}", Name = nameof(GetTodoItemAsync))]
@@ -94,7 +95,7 @@ namespace ToDoList.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     POST api/[controller]/
+        ///     POST /api/v{version}/[controller]/
         ///     {
         ///        "title": "Title",
         ///        "content": "Description",
@@ -109,7 +110,6 @@ namespace ToDoList.API.Controllers
             _todoListContext.TodoItems.Add(todoItem);
             await _todoListContext.SaveChangesAsync();
 
-            //return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
             return CreatedAtRoute(nameof(GetTodoItemAsync), new { id = todoItem.Id }, todoItem);
         }
 
@@ -122,7 +122,7 @@ namespace ToDoList.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     PUT api/[controller]/{id}
+        ///     PUT /api/v{version}/[controller]/{id}
         ///     {
         ///        "id": 1,
         ///        "title": "Title",
@@ -153,7 +153,6 @@ namespace ToDoList.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                //if (_todoListContext.TodoListItems.Find(todoItem.Id) == null)
                 if (!_todoListContext.TodoListItems.Any(t => t.Id == todoItem.Id))
                 {
                     _logger.LogError($"TodoItem with id {id} not found.");
@@ -174,7 +173,7 @@ namespace ToDoList.API.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     DELETE /api/[controller]/{id}
+        ///     DELETE /api/v{version}/[controller]/{id}
         /// </remarks>
         /// <response code="404">If the item is not found</response>
         [HttpDelete]
