@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using ToDoList.API.Extensions;
 using ToDoList.API.Services;
+using ToDoList.API.Services.Interfaces;
 using ToDoList.API.Swagger;
 using ToDoList.Core.Repositories;
 using ToDoList.Core.Repositories.Interfaces;

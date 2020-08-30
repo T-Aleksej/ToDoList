@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure;
+using ToDoList.API.Services.Interfaces;
 using ToDoList.Core.Model;
 
 namespace ToDoList.API.Services

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ToDoList.API.Controllers;
 using ToDoList.API.Infrastructure;
 using ToDoList.API.Services;
+using ToDoList.API.Services.Interfaces;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;

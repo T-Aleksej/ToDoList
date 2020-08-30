@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
 using ToDoList.Core.Model;
 
-namespace ToDoList.API.Services
+namespace ToDoList.API.Services.Interfaces
 {
     public interface ITodoListItemFilterService
     {
