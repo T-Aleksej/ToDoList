@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
-namespace ToDoList.API.Repositories
+namespace ToDoList.Core.Repositories.Interfaces
 {
     public interface IGenericRepository<T>
     {
@@ -9,7 +9,7 @@ namespace ToDoList.API.Repositories
         IQueryable<T> GetQueryable();
         void Add(T model);
         void Remove(T model);
-        public void Update(T model);
+        void Update(T model);
         Task SaveAsync();
     }
 }

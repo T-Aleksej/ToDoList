@@ -6,10 +6,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
-using ToDoList.API.Repositories;
 using ToDoList.API.Services;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Model;
+using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.API.Controllers
 {

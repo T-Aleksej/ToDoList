@@ -1,6 +1,6 @@
 ﻿using ToDoList.Core.Model;
 
-namespace ToDoList.API.Repositories
+namespace ToDoList.Core.Repositories.Interfaces
 {
     public interface ITodoListItemRepository : IGenericRepository<TodoListItem> { }
 }

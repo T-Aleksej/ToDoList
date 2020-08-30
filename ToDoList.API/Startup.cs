@@ -7,9 +7,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using ToDoList.API.Extensions;
-using ToDoList.API.Repositories;
 using ToDoList.API.Services;
 using ToDoList.API.Swagger;
+using ToDoList.Core.Repositories;
+using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.API
 {

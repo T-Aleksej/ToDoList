@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using ToDoList.Core.Repositories.Interfaces;
 
-namespace ToDoList.API.Repositories
+namespace ToDoList.Core.Repositories
 {
     public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
-        where TEntity : class
-        where TContext : DbContext
+       where TEntity : class
+       where TContext : DbContext
     {
         protected GenericRepository(TContext context)
         {
