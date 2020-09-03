@@ -1,32 +1,41 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using ToDoList.Core.Model.Base;
 
 namespace ToDoList.Core.Model
 {
-    public class TodoItem
+    public class TodoItem : Identity
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         /// <summary>
         /// The title of the TodoItem
         /// </summary>
-        [Required] [MaxLength(50)] public string Title { get; set; }
+        [Required(ErrorMessage = "Title is required")]
+        [MaxLength(50, ErrorMessage = "Title can't be longer than 50 characters")] 
+        public string Title { get; set; }
 
         /// <summary>
         /// The content of the TodoItem
         /// </summary>
-        [Required] [MaxLength(1000)] public string Content { get; set; }
+        [Required(ErrorMessage = "Content is required")]
+        [MaxLength(1000, ErrorMessage = "Content can't be longer than 1000 characters")] 
+        public string Content { get; set; }
 
         /// <summary>
         /// Assigned due date
         /// </summary>
-        [DataType(DataType.Date)] [Required] public DateTime DuetoDateTime { get; set; }
+        [Required(ErrorMessage = "DuetoDateTime is required")]
+        [DataType(DataType.Date)] 
+        public DateTime DuetoDateTime { get; set; }
 
         /// <summary>
         /// Is the task done
         /// </summary>
-        [DefaultValue(false)] [Required] public bool Done { get; set; }
+        [Required(ErrorMessage = "Done is required")]
+        [DefaultValue(false)] 
+        public bool Done { get; set; }
 
         public int TodoListItemId { get; set; }
         public TodoListItem TodoListItem { get; set; }
