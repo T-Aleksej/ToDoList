@@ -9,8 +9,8 @@ using System.Net;
 using System.Threading.Tasks;
 using ToDoList.API.Controllers;
 using ToDoList.API.Infrastructure;
-using ToDoList.API.Services;
-using ToDoList.API.Services.Interfaces;
+using ToDoList.API.Infrastructure.Filters;
+using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
 using ToDoList.Core.Model;
@@ -47,18 +47,18 @@ namespace ToDoList.API.UnitTests.Application
             var pageIndex = 1;
             var pageSize = 15;
             var itemsInPage = 1;
-            var queryParam = GetFakeTodoItemQueryParameters(todoListItemId, pageSize, pageIndex);
+            Mock<TodoItemQueryParameters> fakeTodoItemQueryParameters = new Mock<TodoItemQueryParameters>();
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
-            var actionResult = await todoItemController.ItemsAsync(queryParam);
+            var actionResult = await todoItemController.ItemsAsync(todoListItemId, fakeTodoItemQueryParameters.Object, pageIndex, pageSize);
 
             //Assert
             Assert.IsType<ActionResult<PaginatedItemsViewModel<TodoItem>>>(actionResult);
             var viewModel = Assert.IsAssignableFrom<PaginatedItemsViewModel<TodoItem>>(((ObjectResult)actionResult.Result).Value);
-            Assert.Equal(totalitems, viewModel.Totalitems);
+            Assert.Equal(totalitems, viewModel.TotalCount);
             Assert.Equal(pageIndex, viewModel.PageIndex);
             Assert.Equal(pageSize, viewModel.PageSize);
             Assert.Equal(itemsInPage, viewModel.Data.Count());
@@ -71,13 +71,13 @@ namespace ToDoList.API.UnitTests.Application
             var notExistTodoListItemId = 2;
             var pageIndex = 1;
             var pageSize = 15;
-            var queryParam = GetFakeTodoItemQueryParameters(notExistTodoListItemId, pageSize, pageIndex);
+            Mock<TodoItemQueryParameters> fakeTodoItemQueryParameters = new Mock<TodoItemQueryParameters>();
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
-            var actionResult = await todoItemController.ItemsAsync(queryParam);
+            var actionResult = await todoItemController.ItemsAsync(notExistTodoListItemId, fakeTodoItemQueryParameters.Object, pageIndex, pageSize);
 
             //Assert
             Assert.Equal((actionResult.Result as NotFoundResult).StatusCode, (int)HttpStatusCode.NotFound);
@@ -89,7 +89,7 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int todoItemId = 1;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -106,7 +106,7 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int notExistTodoItemId = 2;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -123,7 +123,7 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 2;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
             var fakeTodoItem = GetTodoItemFake(todoItemId);
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -131,7 +131,8 @@ namespace ToDoList.API.UnitTests.Application
 
             //Assert
             Assert.Equal((actionResult.Result as ObjectResult).StatusCode, (int)HttpStatusCode.Created);
-            Assert.Equal((((ObjectResult)actionResult.Result).Value as TodoItem).Id, todoItemId);
+            //Assert.Equal((((ObjectResult)actionResult.Result).Value as TodoItem).Id, todoItemId);
+            Assert.Equal(((CreatedResult)actionResult.Result).Value, todoItemId);
         }
 
         [Fact]
@@ -141,7 +142,7 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 1;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
             var fakeTodoItem = GetTodoItemFake(todoItemId);
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -158,7 +159,7 @@ namespace ToDoList.API.UnitTests.Application
             int notExistTodoItemId = 5;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
             var fakeTodoItem = GetTodoItemFake(notExistTodoItemId);
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -176,7 +177,7 @@ namespace ToDoList.API.UnitTests.Application
             int wrongTodoItemId = 2;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
             var fakeTodoItem = GetTodoItemFake(todoItemId);
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -192,7 +193,7 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int todoItemId = 1;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -208,7 +209,7 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int notExistTodoItemId = 5;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            ITodoItemFilterService filter = new TodoItemFilterService();
+            IFilterWrapper filter = new FilterWrapper();
 
             // Act
             var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
@@ -243,15 +244,6 @@ namespace ToDoList.API.UnitTests.Application
                 Content = "Content",
                 Done = true,
                 DuetoDateTime = DateTime.Now
-            };
-        }
-        private TodoItemQueryParameters GetFakeTodoItemQueryParameters(int todoListItemId, int pageSize, int pageIndex)
-        {
-            return new TodoItemQueryParameters()
-            {
-                TodoListItem = todoListItemId,
-                PageSize = pageSize,
-                PageIndex = pageIndex
             };
         }
     }
