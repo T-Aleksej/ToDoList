@@ -7,8 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using ToDoList.API.Extensions;
-using ToDoList.API.Services;
-using ToDoList.API.Services.Interfaces;
+using ToDoList.API.Infrastructure.Filters;
+using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.Swagger;
 using ToDoList.Core.Repositories;
 using ToDoList.Core.Repositories.Interfaces;
@@ -30,18 +30,17 @@ namespace ToDoList.API
         {
             services.AddCustomDbContext(Configuration);
             services.AddControllers();
- 
+
             services.AddApiVersioning(Configuration);
             services.AddApiExplorer(Configuration);
 
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
             services.AddSwagger(Configuration);
 
-            services.AddScoped<ITodoItemFilterService, TodoItemFilterService>();
-            services.AddScoped<ITodoListItemFilterService, TodoListItemFilterService>();
-
             services.AddScoped<ITodoListItemRepository, TodoListItemRepository>();
             services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+
+            services.AddScoped<IFilterWrapper, FilterWrapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,6 +55,7 @@ namespace ToDoList.API
 
             app.UseSwaggerUI(options =>
             {
+                options.RoutePrefix = string.Empty;
                 //options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 foreach (var description in apiProvider.ApiVersionDescriptions)
                 {
@@ -70,7 +70,6 @@ namespace ToDoList.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapDefaultControllerRoute();
             });
         }
     }
