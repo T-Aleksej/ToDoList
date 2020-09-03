@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
-using ToDoList.API.Infrastructure;
+using System.Threading.Tasks;
+using ToDoList.API.ViewModel;
 
 namespace ToDoList.API.Extensions
 {
@@ -15,13 +17,19 @@ namespace ToDoList.API.Extensions
             return condition() ? queryable.Where(selector) : queryable;
         }
 
-        public static IQueryable<T> Pagination<T>(this IQueryable<T> todoItems, QueryParameters queryParam)
+        public static async Task<PaginatedItemsViewModel<T>> ToPagedListAsync<T>(this IQueryable<T> queryable, int pageIndex, int pageSize)
+            where T : class
         {
-            todoItems = todoItems
-               .Skip(queryParam.PageSize * (queryParam.PageIndex - 1))
-               .Take(queryParam.PageSize);
+            var items = queryable
+               .Skip(pageSize * (pageIndex - 1))
+               .Take(pageSize);
 
-            return todoItems;
+            return new PaginatedItemsViewModel<T>(
+                await items.ToListAsync(),
+                pageIndex,
+                pageSize,
+                await items.CountAsync()
+                );
         }
     }
 }
