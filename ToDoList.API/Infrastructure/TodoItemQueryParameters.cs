@@ -1,15 +1,9 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace ToDoList.API.Infrastructure
 {
-    public class TodoItemQueryParameters : QueryParameters
+    public class TodoItemQueryParameters
     {
-        /// <summary>
-        /// TodoListItem ID
-        /// </summary>
-        [Required] public int TodoListItem { get; set; }
-
         /// <summary>
         /// TodoItem title
         /// </summary>

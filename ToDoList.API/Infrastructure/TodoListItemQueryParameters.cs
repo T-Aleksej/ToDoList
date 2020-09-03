@@ -1,6 +1,6 @@
 ﻿namespace ToDoList.API.Infrastructure
 {
-    public class TodoListItemQueryParameters : QueryParameters
+    public class TodoListItemQueryParameters
     {
         /// <summary>
         /// TodoListItem title
