@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ToDoList.API.ViewModel
 {
     public class PaginatedItemsViewModel<TEntity> where TEntity : class
     {
-        public PaginatedItemsViewModel(int pageIndex, int pageSize, long totalitems, IEnumerable<TEntity> data)
+        public PaginatedItemsViewModel(IEnumerable<TEntity> data, int pageIndex, int pageSize, int totalCount)
         {
             PageIndex = pageIndex;
             PageSize = pageSize;
-            Totalitems = totalitems;
+            TotalCount = totalCount;
             Data = data;
         }
 
@@ -25,7 +26,12 @@ namespace ToDoList.API.ViewModel
         /// <summary>
         /// Total items
         /// </summary>
-        public long Totalitems { get; private set; }
+        public int TotalCount { get; private set; }
+
+        /// <summary>
+        /// Total pages
+        /// </summary>
+        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 
         /// <summary>
         /// The data playload
