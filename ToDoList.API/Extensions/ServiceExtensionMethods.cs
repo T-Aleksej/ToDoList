@@ -53,7 +53,7 @@ namespace ToDoList.API.Extensions
             services.AddVersionedApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVVV";
-                options.SubstituteApiVersionInUrl = false;
+                options.SubstituteApiVersionInUrl = true;
             });
 
             return services;
