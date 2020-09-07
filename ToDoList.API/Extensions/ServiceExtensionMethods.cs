@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using ToDoList.API.Swagger;
 using ToDoList.Core.Context;
 
@@ -12,12 +15,42 @@ namespace ToDoList.API.Extensions
 {
     public static class ServiceExtensionMethods
     {
-        public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
-            services.AddDbContext<TodoListContext>(options =>
+            if (env.IsProduction())
             {
-                options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
-            });
+                // Prod, windows and linux
+                services.AddDbContext<TodoListContext>(options =>
+                {
+                    options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"],
+                        sqlServerOptionsAction: sqlOptions =>
+                        {
+                            sqlOptions.MigrationsAssembly("ToDoList.Data");
+                            sqlOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                        });
+                });
+            }
+            else
+            {
+                var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+                if (isWindows)
+                {
+                    // Dev windows
+                    services.AddDbContext<TodoListContext>(options =>
+                    {
+                        options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
+                    });
+                }
+                else
+                {
+                     // Dev linux
+                    services.AddDbContext<TodoListContext>(options =>
+                    {
+                        options.UseSqlite(configuration["ConnectionStrings:SQLiteConnection"]);
+                    });
+                }
+            }
 
             return services;
         }
