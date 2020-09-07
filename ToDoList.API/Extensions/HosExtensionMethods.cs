@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Diagnostics;
@@ -14,10 +16,20 @@ namespace ToDoList.API.Extensions
             {
                 var services = scope.ServiceProvider;
                 var context = services.GetService<ToDoList.Core.Context.TodoListContext>();
+                var env = services.GetService<IWebHostEnvironment>();
 
                 try
                 {
-                    new TodoListContextSeed().SeedAsync(context).Wait();
+                    if (env.IsProduction())
+                    {
+                        // Prod
+                        context.Database.Migrate();
+                    }
+                    else
+                    {
+                        // Dev
+                        new TodoListContextSeed().SeedAsync(context).Wait();
+                    }
                 }
                 catch (Exception ex)
                 {
