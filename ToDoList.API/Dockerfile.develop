@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+ENV ASPNETCORE_ENVIRONMENT=Development
+EXPOSE 5000
+
+WORKDIR /src
+COPY "ToDoList.API/ToDoList.API.csproj" "ToDoList.API/ToDoList.API.csproj"
+COPY "ToDoList.Data/ToDoList.Data.csproj" "ToDoList.Data/ToDoList.Data.csproj"
+COPY "ToDoList.Core/ToDoList.Core.csproj" "ToDoList.Core/ToDoList.Core.csproj"
+RUN dotnet restore "ToDoList.API/ToDoList.API.csproj"
+COPY . .
+WORKDIR "/src/ToDoList.API"
+RUN dotnet build "ToDoList.API.csproj" -c Debug
+
+ENTRYPOINT ["dotnet", "run", "--no-build", "--no-launch-profile", "-c", "Debug", "--"]
