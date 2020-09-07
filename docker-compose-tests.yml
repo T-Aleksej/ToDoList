@@ -1,0 +1,10 @@
+version: '3.6'
+
+services:
+
+  todolist-api-unit-test:
+    image: todolist-api-unit-test:dev
+    build:
+      context: .
+      dockerfile: ToDoList.API/Dockerfile
+      target: unittest
