@@ -1,0 +1,16 @@
+version: '3.6'
+
+services:
+
+  sqldata:
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+
+  todolist-api:
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqldata;Database=TodoList;User Id=sa;Password=Pass@word
+    ports:
+      - "8080:80"

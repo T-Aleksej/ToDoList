@@ -1,0 +1,14 @@
+version: '3.6'
+
+services:
+
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+
+  todolist-api:
+    image: todolist-api:dev
+    build:
+      context: .
+      dockerfile: ToDoList.API/Dockerfile
+    depends_on:
+      - sqldata
