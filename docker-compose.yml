@@ -12,3 +12,4 @@ services:
       dockerfile: ToDoList.API/Dockerfile
     depends_on:
       - sqldata
+    command: sh -c 'dockerize -wait tcp://sqldata:1433 -timeout 20s -wait-retry-interval 2s -- dotnet ToDoList.API.dll'
