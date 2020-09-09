@@ -7,8 +7,8 @@ using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure;
 using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.ViewModel;
-using ToDoList.Core.Model;
-using ToDoList.Core.Model.Base;
+using ToDoList.Core.Entities;
+using ToDoList.Core.Entities.Base;
 using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.API.Controllers

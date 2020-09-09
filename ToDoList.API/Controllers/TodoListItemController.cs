@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
 using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.ViewModel;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.API.Controllers

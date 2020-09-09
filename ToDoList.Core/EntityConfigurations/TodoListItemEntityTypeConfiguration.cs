@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 
 namespace ToDoList.Core.EntityConfigurations
 {

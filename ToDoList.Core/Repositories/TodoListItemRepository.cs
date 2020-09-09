@@ -1,5 +1,5 @@
 ﻿using ToDoList.Core.Context;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.Core.Repositories

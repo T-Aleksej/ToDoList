@@ -13,7 +13,7 @@ using ToDoList.API.Infrastructure.Filters;
 using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.ViewModel;
 using ToDoList.Core.Context;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 using ToDoList.Core.Repositories;
 using Xunit;
 

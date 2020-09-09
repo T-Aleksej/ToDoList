@@ -1,4 +1,4 @@
-﻿namespace ToDoList.Core.Model.Base
+﻿namespace ToDoList.Core.Entities.Base
 {
     public interface IHaveId
     {

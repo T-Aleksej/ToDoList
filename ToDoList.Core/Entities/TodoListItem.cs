@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using ToDoList.Core.Model.Base;
+using ToDoList.Core.Entities.Base;
 
-namespace ToDoList.Core.Model
+namespace ToDoList.Core.Entities
 {
     public class TodoListItem : Identity
     {

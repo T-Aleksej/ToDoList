@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 
 namespace ToDoList.API.Infrastructure
 {
