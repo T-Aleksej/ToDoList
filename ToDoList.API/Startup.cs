@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using AutoMapper;
 using ToDoList.API.Extensions;
 using ToDoList.API.Infrastructure.Filters;
 using ToDoList.API.Infrastructure.Filters.Interfaces;
@@ -44,6 +46,8 @@ namespace ToDoList.API
             services.AddScoped<ITodoItemRepository, TodoItemRepository>();
 
             services.AddScoped<IFilterWrapper, FilterWrapper>();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,4 +1,4 @@
-﻿using ToDoList.Core.Model;
+﻿using ToDoList.Core.Entities;
 
 namespace ToDoList.Core.Repositories.Interfaces
 {

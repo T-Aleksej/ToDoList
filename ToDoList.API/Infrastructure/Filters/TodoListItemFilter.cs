@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using ToDoList.API.Extensions;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 using TToDoList.API.Infrastructure.Filters.Interfaces;
 
 namespace ToDoList.API.Infrastructure.Filters

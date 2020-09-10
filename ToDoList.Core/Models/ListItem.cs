@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using ToDoList.Core.Model.Base;
+using ToDoList.Core.Entities.Base;
 
-namespace ToDoList.Core.Model
+namespace ToDoList.Core.Models
 {
-    public class TodoListItem : Identity
+    public class ListItem: Identity
     {
         /// <summary>
         /// The title of the TodoListItem
@@ -18,7 +18,5 @@ namespace ToDoList.Core.Model
         /// </summary>
         [MaxLength(100, ErrorMessage = "Description can't be longer than 100 characters")]
         public string Description { get; set; }
-
-        public List<TodoItem> TodoItems { get; set; }
     }
 }

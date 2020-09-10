@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
 
 namespace ToDoList.Core.Context
 {

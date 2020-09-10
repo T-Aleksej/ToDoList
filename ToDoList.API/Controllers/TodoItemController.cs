@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,7 +9,8 @@ using System.Threading.Tasks;
 using ToDoList.API.Infrastructure;
 using ToDoList.API.Infrastructure.Filters.Interfaces;
 using ToDoList.API.ViewModel;
-using ToDoList.Core.Model;
+using ToDoList.Core.Entities;
+using ToDoList.Core.Models;
 using ToDoList.Core.Repositories.Interfaces;
 
 namespace ToDoList.API.Controllers
@@ -17,13 +19,13 @@ namespace ToDoList.API.Controllers
     [ApiVersion(version: "1.0", Deprecated = false)]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    public class TodoItemController : GenericController<TodoItem>
+    public class TodoItemController : GenericController<TodoItem, Item>
     {
         private readonly ILogger<TodoItemController> _logger;
         private readonly ITodoItemRepository _repo;
 
-        public TodoItemController(ITodoItemRepository repo, ILogger<TodoItemController> logger, IFilterWrapper filter)
-            : base(repo, logger, filter)
+        public TodoItemController(ITodoItemRepository repo, ILogger<TodoItemController> logger, IFilterWrapper filter, IMapper mapper)
+            : base(repo, logger, filter, mapper)
         {
             _logger = logger;
             _repo = repo;
@@ -44,9 +46,9 @@ namespace ToDoList.API.Controllers
         /// </remarks>
         /// <response code="404">If the items is not found</response>
         [HttpGet("todoListItem/{todoListItem:int}/todoItems")]
-        [ProducesResponseType(typeof(PaginatedItemsViewModel<TodoItem>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedItemsViewModel<Item>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<PaginatedItemsViewModel<TodoItem>>> ItemsAsync([FromRoute] int todoListItem, [FromQuery] TodoItemQueryParameters queryParam, int pageIndex = 1, [Range(1, 100)] int pageSize = 10)
+        public async Task<ActionResult<PaginatedItemsViewModel<Item>>> ItemsAsync([FromRoute] int todoListItem, [FromQuery] TodoItemQueryParameters queryParam, int pageIndex = 1, [Range(1, 100)] int pageSize = 10)
         {
             return await GetItems(_repo.GetQueryable().Where(t => t.TodoListItemId == todoListItem), queryParam, pageIndex, pageSize);
         }
@@ -64,8 +66,8 @@ namespace ToDoList.API.Controllers
         /// <response code="404">If the item is not found</response>
         [HttpGet("{id:int}", Name = nameof(GetTodoItemAsync))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(TodoItem), StatusCodes.Status200OK)]
-        public async Task<ActionResult<TodoItem>> GetTodoItemAsync(int id) => await GetItem(id);
+        [ProducesResponseType(typeof(Item), StatusCodes.Status200OK)]
+        public async Task<ActionResult<Item>> GetTodoItemAsync(int id) => await GetItem(id);
 
         /// <summary>
         /// Add a specific TodoItem.
@@ -81,12 +83,12 @@ namespace ToDoList.API.Controllers
         ///        "content": "Description",
         ///        "duetoDateTime": 2020-08-20,
         ///        "done": true,
-        ///        "TodoListItemId": 1
+        ///        "ListItemId": 1
         ///     }
         /// </remarks>
         [HttpPost]
-        [ProducesResponseType(typeof(TodoItem), StatusCodes.Status201Created)]
-        public async Task<ActionResult<TodoItem>> CreateTodoItemAsync([FromBody] TodoItem todoItem) => await Create(todoItem);
+        [ProducesResponseType(typeof(Item), StatusCodes.Status201Created)]
+        public async Task<ActionResult<Item>> CreateTodoItemAsync([FromBody] Item todoItem) => await Create(todoItem);
 
         /// <summary>
         /// Change a specific TodoItem.
@@ -104,7 +106,7 @@ namespace ToDoList.API.Controllers
         ///        "content": "Description",
         ///        "duetoDateTime": 2020-08-20,
         ///        "done": true,
-        ///        "TodoListItemId": 1
+        ///        "ListItemId": 1
         ///     }
         /// </remarks>
         /// <response code="400">If id is not equal to TodoItem.Id</response>
@@ -112,7 +114,7 @@ namespace ToDoList.API.Controllers
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateTodoItemAsync([FromRoute] int id, [FromBody] TodoItem todoItem) => await Updat(id, todoItem);
+        public async Task<ActionResult> UpdateTodoItemAsync([FromRoute] int id, [FromBody] Item todoItem) => await Updat(id, todoItem);
 
         /// <summary>
         /// Deletes a specific TodoItem.
@@ -127,6 +129,6 @@ namespace ToDoList.API.Controllers
         /// <response code="404">If the item is not found</response>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TodoItem>> DeleteTodoItemAsync(int id) => await Delete(id);
+        public async Task<ActionResult<Item>> DeleteTodoItemAsync(int id) => await Delete(id);
     }
 }
