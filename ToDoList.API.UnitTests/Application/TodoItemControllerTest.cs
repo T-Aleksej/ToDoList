@@ -16,6 +16,8 @@ using ToDoList.Core.Context;
 using ToDoList.Core.Entities;
 using ToDoList.Core.Repositories;
 using Xunit;
+using AutoMapper;
+using ToDoList.Core.Models;
 
 namespace ToDoList.API.UnitTests.Application
 {
@@ -23,9 +25,13 @@ namespace ToDoList.API.UnitTests.Application
     {
         private readonly DbContextOptions<TodoListContext> _dbOptions;
         private readonly Mock<ILogger<TodoItemController>> _loggerMock;
+        private readonly IMapper _mapper;
 
         public TodoItemControllerTest()
         {
+            var mapperConfig = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()));
+            _mapper = mapperConfig.CreateMapper();
+
             _loggerMock = new Mock<ILogger<TodoItemController>>();
 
             _dbOptions = new DbContextOptionsBuilder<TodoListContext>()
@@ -51,13 +57,14 @@ namespace ToDoList.API.UnitTests.Application
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
             IFilterWrapper filter = new FilterWrapper();
 
+
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.ItemsAsync(todoListItemId, fakeTodoItemQueryParameters.Object, pageIndex, pageSize);
 
             //Assert
-            Assert.IsType<ActionResult<PaginatedItemsViewModel<TodoItem>>>(actionResult);
-            var viewModel = Assert.IsAssignableFrom<PaginatedItemsViewModel<TodoItem>>(((ObjectResult)actionResult.Result).Value);
+            Assert.IsType<ActionResult<PaginatedItemsViewModel<Item>>>(actionResult);
+            var viewModel = Assert.IsAssignableFrom<PaginatedItemsViewModel<Item>>(((ObjectResult)actionResult.Result).Value);
             Assert.Equal(totalitems, viewModel.TotalCount);
             Assert.Equal(pageIndex, viewModel.PageIndex);
             Assert.Equal(pageSize, viewModel.PageSize);
@@ -76,7 +83,7 @@ namespace ToDoList.API.UnitTests.Application
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.ItemsAsync(notExistTodoListItemId, fakeTodoItemQueryParameters.Object, pageIndex, pageSize);
 
             //Assert
@@ -92,12 +99,12 @@ namespace ToDoList.API.UnitTests.Application
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.GetTodoItemAsync(todoItemId);
 
             //Assert
             Assert.Equal((actionResult.Result as OkObjectResult).StatusCode, (int)HttpStatusCode.OK);
-            Assert.Equal((((ObjectResult)actionResult.Result).Value as TodoItem).Id, todoItemId);
+            Assert.Equal((((ObjectResult)actionResult.Result).Value as Item).Id, todoItemId);
         }
 
         [Fact]
@@ -109,7 +116,7 @@ namespace ToDoList.API.UnitTests.Application
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.GetTodoItemAsync(notExistTodoItemId);
 
             //Assert
@@ -122,11 +129,11 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int todoItemId = 2;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            var fakeTodoItem = GetTodoItemFake(todoItemId);
+            var fakeTodoItem = GetItemFake(todoItemId);
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.CreateTodoItemAsync(fakeTodoItem);
 
             //Assert
@@ -141,11 +148,11 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int todoItemId = 1;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            var fakeTodoItem = GetTodoItemFake(todoItemId);
+            var fakeTodoItem = GetItemFake(todoItemId);
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.UpdateTodoItemAsync(todoItemId, fakeTodoItem);
 
             //Assert
@@ -158,11 +165,11 @@ namespace ToDoList.API.UnitTests.Application
             //Arrange
             int notExistTodoItemId = 5;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            var fakeTodoItem = GetTodoItemFake(notExistTodoItemId);
+            var fakeTodoItem = GetItemFake(notExistTodoItemId);
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.UpdateTodoItemAsync(notExistTodoItemId, fakeTodoItem);
 
             //Assert
@@ -176,11 +183,11 @@ namespace ToDoList.API.UnitTests.Application
             int todoItemId = 1;
             int wrongTodoItemId = 2;
             var repo = new TodoItemRepository(new TodoListContext(_dbOptions));
-            var fakeTodoItem = GetTodoItemFake(todoItemId);
+            var fakeTodoItem = GetItemFake(todoItemId);
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.UpdateTodoItemAsync(wrongTodoItemId, fakeTodoItem);
 
             //Assert
@@ -196,7 +203,7 @@ namespace ToDoList.API.UnitTests.Application
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.DeleteTodoItemAsync(todoItemId);
 
             //Assert
@@ -212,7 +219,7 @@ namespace ToDoList.API.UnitTests.Application
             IFilterWrapper filter = new FilterWrapper();
 
             // Act
-            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter);
+            var todoItemController = new TodoItemController(repo, _loggerMock.Object, filter, _mapper);
             var actionResult = await todoItemController.DeleteTodoItemAsync(notExistTodoItemId);
 
             //Assert
@@ -234,12 +241,13 @@ namespace ToDoList.API.UnitTests.Application
                 }
             };
         }
-        private TodoItem GetTodoItemFake(int todoItemId)
+        private Item GetItemFake(int todoItemId)
         {
-            return new TodoItem()
+            return new Item()
             {
                 Id = todoItemId,
-                TodoListItemId = 1,
+                //TodoListItemId = 1,
+                ListItemId = 1,
                 Title = "TodoItemFake",
                 Content = "Content",
                 Done = true,
