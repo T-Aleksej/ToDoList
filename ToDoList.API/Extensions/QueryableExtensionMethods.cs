@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -17,19 +18,29 @@ namespace ToDoList.API.Extensions
             return condition() ? queryable.Where(selector) : queryable;
         }
 
-        public static async Task<PaginatedItemsViewModel<T>> ToPagedListAsync<T>(this IQueryable<T> queryable, int pageIndex, int pageSize)
+        //public static async Task<PaginatedItemsViewModel<T>> ToPagedListAsync<T>(this IQueryable<T> queryable, int pageIndex, int pageSize)
+        //    where T : class
+        //{
+        //    var items = queryable
+        //       .Skip(pageSize * (pageIndex - 1))
+        //       .Take(pageSize);
+
+        //    return new PaginatedItemsViewModel<T>(
+        //        await items.ToListAsync(),
+        //        pageIndex,
+        //        pageSize,
+        //        await items.CountAsync()
+        //        );
+        //}
+
+        public static async Task<(List<T>, int, int, int)> ToPagedListAsync<T>(this IQueryable<T> queryable, int pageIndex, int pageSize)
             where T : class
         {
             var items = queryable
                .Skip(pageSize * (pageIndex - 1))
                .Take(pageSize);
 
-            return new PaginatedItemsViewModel<T>(
-                await items.ToListAsync(),
-                pageIndex,
-                pageSize,
-                await items.CountAsync()
-                );
+            return (await items.ToListAsync(), pageIndex, pageSize, await items.CountAsync());
         }
     }
 }
